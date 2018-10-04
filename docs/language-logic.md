@@ -54,7 +54,7 @@ Public Number EntryPoint Arguments Of Array(String)
     In Domain MyDomain
 
         Error Scope
-            result = MyClass(Args = Arguments).Initialize
+            result = ApplicationState.Initialize
         Handle RangeError
             result = "Initialization resulted in a RangeError {LastError.Message}"
         Handle Error
@@ -64,9 +64,8 @@ Public Number EntryPoint Arguments Of Array(String)
 
     return LastError.Set As Number
 
-End Application
 
-Object MyObject Type In MyDomain
+ApplicationState
 
 Set _args Of Array(String)
 
@@ -87,4 +86,6 @@ Public String Initialize
             Throw Error(Message = "Too many arguments!")
     End Choice
 
-End Object
+End ApplicationState
+
+End Application
