@@ -1,0 +1,46 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+name: Pattern
+file_extensions:
+  - pat
+first_line_match: "Pattern File"
+scope: source.pattern
+variables:
+  bool_op_equality: (?:==|Is)
+  bool_op_logical_and: (?:&&|And)
+  bool_op_logical_or: (?:\|\||Or)
+  bool_op_logical_not: (?:!|Not)
+  bool_op_xor: (?:\^|Xor)
+
+  asgn_op_direct: (?:=|From)
+  asgn_op_and: (?:&)
+  asgn_op_or: (?:\|)
+
+  math_op_addition: (?<addition>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\+)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_subtraction: (?<subtraction>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\-)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_multiplication: (?<multiplication>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\*)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_division: (?<division>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\\)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_remainder: (?<remainder>(?<leftvalue>[\d]+)(?:\s*)(?<operator>%)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_power: (?<power>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\^)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_root: (?<root>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\#)(?:\s*)(?<rightvalue>[\d]+))
+
+  math_op_sum: 
+
+  identifier: '\b[[:alpha:]_][[:alnum:]_]*\b'
+  type_chars: '[[:alnum:]\s,._*&<>\[\]-]'
+
+contexts:
+  main:
+    - include: global
+
+  globals:
+    - include: imports
+    - include: functions
+    - include: statements
+
+  statements:
+    - include: expressions-early
+    - include: initializers
+    - include: block
+    - match: \b(Object)\s+({{identifier}})\s+(Of)\s+({{}})
