@@ -7,6 +7,9 @@ file_extensions:
 first_line_match: "Pattern File"
 scope: source.pattern
 variables:
+  number_number: (?<integer>[0-9]+)
+  number_hex: (?<hexvalue>(?<token>(?:0[xX]+)|[$])(?<value>(?(token)[a-fA-F0-9]+)))
+
   bool_op_equality: (?:==|Is)
   bool_op_logical_and: (?:&&|And)
   bool_op_logical_or: (?:\|\||Or)
@@ -25,7 +28,18 @@ variables:
   math_op_power: (?<power>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\^)(?:\s*)(?<rightvalue>[\d]+))
   math_op_root: (?<root>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\#)(?:\s*)(?<rightvalue>[\d]+))
 
-  math_op_sum: 
+  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_remove_first: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_remove_first: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_remove_last: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_remove_set: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_replace_first: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_replace_last: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_replace_set: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
 
   identifier: '\b[[:alpha:]_][[:alnum:]_]*\b'
   type_chars: '[[:alnum:]\s,._*&<>\[\]-]'

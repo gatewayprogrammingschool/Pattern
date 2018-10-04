@@ -168,12 +168,14 @@ Being an expressive language, Pattern allows for operators that have two keyword
 |String Operation|Short Operator|Long Operator|Result Type|
 |----------------|:------------:|:-----------:|-----------|
 |Concatenation|++|Concat-With[-With]|String|
-|Remove First|-<|RemoveFirst|String|
-|Remove Last|->|RemoveLast|String|
-|Remove Set|-(""[,""]+)|RemoveSet|Array|
-|Replace First|!<|ReplaceFirst|String|
-|Replace Last|!>|ReplaceLast|String|
-|Replace Set|!(""[,""]+)|ReplaceSet|Array|
+|Remova All|--|Remove All|String|
+|Remove First|-<|Remove First|String|
+|Remove Last|->|Remove Last|String|
+|Remove Set|-(Array(String))|Remove Set|Array|
+|Replace All|!!|Replace All|String|
+|Replace First|!<|Replace First|String|
+|Replace Last|!>|Replace Last|String|
+|Replace Set|!(Array(String))|Replace Set|Array|
 |Substring|((#[,#]))|Substring(#[,#])|String|
 |First Index Of|<(""[,""]+)|First|Number|
 |Last Index Of|>(""[,""]+)|Last|Number|
