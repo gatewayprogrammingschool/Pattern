@@ -151,7 +151,7 @@ Being an expressive language, Pattern allows for operators that have two keyword
 
 |Assignment Operation|Short Operator|Long Operator|Result Type|
 |--------------------|:------------:|:-----------:|-----------|
-|Direct Assignment|=|To|Type|
+|Direct Assignment|=|From|Type|
 |And|&|n/a|Number, EnumerationNode|
 |Or|\|n/a|Number, EnumerationNode|
 
