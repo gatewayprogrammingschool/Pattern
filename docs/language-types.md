@@ -161,8 +161,9 @@ Being an expressive language, Pattern allows for operators that have two keyword
 |Subtraction|-|Minus|Number|
 |Multiplication|*|Multiply(##,##[,##])|Number|
 |Division|/|DivideBy|Number|
+|Remainder|%|Remainder|Number|
 |Power|^|PowerOf|Number|
-|Root|%|Root|Number|
+|Root|#|Root|Number|
 
 |String Operation|Short Operator|Long Operator|Result Type|
 |----------------|:------------:|:-----------:|-----------|
