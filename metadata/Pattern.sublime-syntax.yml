@@ -227,17 +227,27 @@ contexts:
             - match: '^(End Application Scope)'
               scope: storage.type.namespace.pattern
               pop: true
-            - include: option_done
             - include: main
         - match: '(?=\S)'
+        - include: option_done
 
   application_declaration:
-    - match: '^(Application)\s({{name}})(?:\s+({{comments}}))?$'
-      captures:
-        1: storage.type.class.pattern
-        2: entity.name.application.pattern # new!!!
-      push: application_signature # new!!
-
+    - match: '^(Application)\s+'
+      scope: storage.type.class.pattern
+      push:
+        - meta_scope: meta.namespace.pattern
+        - match: '({{name}})'
+        - match: '^'
+          scope: section.block.begin.pattern
+          set:
+            - meta_scope: meta.namespace.pattern meta.block.pattern
+            - match: '^(End Application Scope)'
+              scope: storage.type.namespace.pattern
+              pop: true
+            - include: main
+            - include: option_done
+        - match: '(?=\S)'
+        - include: option_done
 
   object_declaration:
     - match: '^(?:\b(Public|)?\s)?\b(Object)\s({{name}})\s(Of)\s({{name}})(?:\s(In)\s({{name}}))?\b$'
@@ -250,8 +260,17 @@ contexts:
         6: storage.type.class.pattern
         7: entity.name.class.pattern
       push: [class_signature, data_type_signature]
-    - match: '^(?:\b(Public|)?\s)?\b(Enum)\s({{name}})\b({{comments}})?$'
+    - match: '^(?:\b(Public|)?\s)?\b(Enum)\s({{name}})\b'
       captures:
         1: storage.modifier.access.pattern
         2: storage.type.class.pattern
         3: entity.name.class.pattern
+      push:
+        - meta_content_scope: meta.enum.pattern
+        - match: '^'
+          set:
+            - meta_scope: meta.enum.body.pattern meta.block.pattern
+            - match: '^(End Object)'
+            
+
+    - include: option_done
