@@ -21,49 +21,237 @@ variables:
   asgn_op_and: (?:&)
   asgn_op_or: (?:\|)
 
-  math_op_addition: (?<addition>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\+)(?:\s*)(?<rightvalue>[\d]+))
-  math_op_subtraction: (?<subtraction>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\-)(?:\s*)(?<rightvalue>[\d]+))
-  math_op_multiplication: (?<multiplication>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\*)(?:\s*)(?<rightvalue>[\d]+))
-  math_op_division: (?<division>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\\)(?:\s*)(?<rightvalue>[\d]+))
-  math_op_remainder: (?<remainder>(?<leftvalue>[\d]+)(?:\s*)(?<operator>%)(?:\s*)(?<rightvalue>[\d]+))
-  math_op_power: (?<power>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\^)(?:\s*)(?<rightvalue>[\d]+))
-  math_op_root: (?<root>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\#)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_addition: (?:[+]) # (?<addition>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\+)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_subtraction: (?:[-]) # (?<subtraction>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\-)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_multiplication: (?:[*]) # (?<multiplication>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\*)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_division: (?:[/]) # (?<division>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\\)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_remainder: (?:[%]) # (?<remainder>(?<leftvalue>[\d]+)(?:\s*)(?<operator>%)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_power: (?:^) # (?<power>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\^)(?:\s*)(?<rightvalue>[\d]+))
+  math_op_root: (?:[\#]) # (?<root>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\#)(?:\s*)(?<rightvalue>[\d]+))
 
-  string_op_concatenation: (?<left>{{string}})(?<operator>(?:\s*\+\+\s*))(?<right>{{string}})
-  string_op_remove_all: (?<left>{{string}})(?<operator>(?:\s*\-\-\s*))(?<right>{{string}})
-  string_op_remove_first: (?<left>{{string}})(?<operator>(?:\s*\-\<\s*))(?<right>{{string}})
-  string_op_remove_last: (?<left>{{string}})(?<operator>(?:\s*\-\>\s*))(?<right>{{string}})
+  string_op_concatenation: (?:[+]{2}) # (?<left>{{string}})(?<operator>(?:\s*\+\+\s*))(?<right>{{string}})
+  string_op_remove_all: (?:[-]{2}) # (?<left>{{string}})(?<operator>(?:\s*\-\-\s*))(?<right>{{string}})
+  string_op_remove_first: (?:[-][<]) # (?<left>{{string}})(?<operator>(?:\s*\-\<\s*))(?<right>{{string}})
+  string_op_remove_last: (?:[-][>]) # (?<left>{{string}})(?<operator>(?:\s*\-\>\s*))(?<right>{{string}})
   #string_op_remove_set: (?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_replace_all: (?<left>{{string}})(?<operator>(?:\s*\!\!\s*))(?<right>{{string}})
-  string_op_replace_first: (?<left>{{string}})(?<operator>(?:\s*\!\<\s*))(?<right>{{string}})
-  string_op_replace_last: (?<left>{{string}})(?<operator>(?:\s*\!\>\s*))(?<right>{{string}})
+  string_op_replace_all: (?:[!][!]) # (?<left>{{string}})(?<operator>(?:\s*\!\!\s*))(?<right>{{string}})
+  string_op_replace_first: (?:[!][<]) # (?<left>{{string}})(?<operator>(?:\s*\!\<\s*))(?<right>{{string}})
+  string_op_replace_last: (?:[!][>]) # (?<left>{{string}})(?<operator>(?:\s*\!\>\s*))(?<right>{{string}})
   #string_op_replace_set: (?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_substring: (?(DEFINE)(?<open>\()(?<close>\))(?<number>\d+)(?<operator>(?:\,)))(?<substring>(?P>open){2}(?<number1>(?P>number))(?P>operator)(?<number2>(?P>number))(?P>close){2})
-  string_op_first_index_of: (?<left>{{string}})(?<operator>(?:\s*\<\<\s*))(?<right>{{string}})
-  string_op_last_index_of: (?<left>{{string}})(?<operator>(?:\s*\>\>\s*))(?<right>{{string}})
-  string_op_all_index_of: (?<left>{{string}})(?<operator>(?:\s*\>\<\s*))(?<right>{{string}})
+  #string_op_substring: (?:[-][<]) # (?(DEFINE)(?<open>\()(?<close>\))(?<number>\d+)(?<operator>(?:\,)))(?<substring>(?P>open){2}(?<number1>(?P>number))(?P>operator)(?<number2>(?P>number))(?P>close){2})
+  string_op_first_index_of: (?:[<][<]) # (?<left>{{string}})(?<operator>(?:\s*\<\<\s*))(?<right>{{string}})
+  string_op_last_index_of: (?:[>][>]) # (?<left>{{string}})(?<operator>(?:\s*\>\>\s*))(?<right>{{string}})
+  string_op_all_index_of: (?:[>][<]) # (?<left>{{string}})(?<operator>(?:\s*\>\<\s*))(?<right>{{string}})
 
   unicode_char: '(?:\\u\h{4}|\\U\h{8})'
   escaped_char: '(?:\\[abfnrtv"''\\]|{{unicode_char}}|\\x[0-9a-fA-F]{1,4}|\\[0-9]{1,3})'
 
-  visibility: \b(?:public|private|visible)\b
-  base_type: (?:Type|Reference|Node|Pair|Array|Bag|Flag|Number|Guid|Logical|Character|String|Date|Place|Culture|Enumeration|EnumNode)
-  patterned_type: (?:Domain|Singleton|Facade|Model|View|Controller|Bridge|Adapter|DataStore|DataProvider|DataAdapter|DataBridge|ForeignMethod|Service|Application)
-  type_suffix: ((?:\(,*\))*)
-
-  brackets_capture: 
+  reserved_visibility: \b(?:public|private|visible)\b
+  reserved_base_type: (?:Type|Reference|Node|Pair|Array|Bag|Flag|Number|Guid|Logical|Character|String|Date|Place|Culture|Enumeration|Enum Node)
+  reserved_patterned_type: (?:Domain|Singleton|Facade|Model|View|Controller|Bridge|Adapter|DataStore|DataProvider|DataAdapter|DataBridge|ForeignService|Service|Application)
+  reserved_constructs: (?:Test Set|End Test Set|Test|End Test|Delegate|Event|Watch Event|App Space|End App Space|Property|Return|In|Object|End Object|Specialize|Replace|Application|End Application|With Variable|End With)
+  reserved_decisions: (?:If|Else|Else If|End If|Compare|With|To|When|End Compare|Choice|Other|End Choice)
+  reserved_errors: (?:Error|Error Scope|Handle|End Handle|Last Error|Throw|Rethrow)
+  reserved_loops: (?:Each|Within|End Each|Exit|Next|For|Start|End At|Skip|End For|Do|Until|While|End While)
+  
+  start_char: (?:{{unicode_char}}|[_\p{L}])
+  other_char: (?:{{unicode_char}}|[_0=9\p{L}])
+  name_normal: {{start_char}}{{other_char}}*\b
+  cap_name: (\p{Lu}{{other_char}})
+  name: (?:@{{reserved_base_type}}|@{{reserved_patterned_type}}|@{{reserved_constructs}}|@{{reserved_decisions}}|@{{reserved_errors}}|@{{reserved_loops}}|@?{{name_normal}})
 
 contexts:
+  prototype:
+    - include: comments
+    - match: '^(#)'
+      captures:
+        1: keyword.other.preprocessor.pattern
+        2: punctuation.definition.preprocessor.pattern
+      push: preprocessor_option
+
+  comments:
+    - match: '\s*(///)'
+      captures:
+        1: comment.block.documentation.pattern punctuation.definition.comment.documentation.pattern
+      push: documentation
+    - match: '//'
+      scope: punctuation.definition.comment.pattern
+      push:
+        - meta_scope: comment.line.double-slash.pattern
+        - match: '$\n?'
+          pop: true
+        - include: comments_in
+
+  comments_in:
+    - match: '\b(?:todo|hack|xxx)\b'
+      scope: comment.line.todo.pattern
+    - match: '/!\\'
+      scope: comment.line.todo.pattern
+    - match: '\b(https?://\S*)\b'
+      scope: markup.underline.link.pattern
+
+  preprocessor_option:
+    - meta_scope: meta.preprocessor.pattern
+    - match: '\b(define|undef)\s+({{name}})\b'
+      captures:
+        1: keyword.control.preprocessor.pattern
+        2: entity.name.constant.cs
+    - match: '\b(el)?if\b'
+      scope: keyword.control.preprocessor.pattern
+      push:
+        - match: '\(|\)'
+          scope: punctuation.section.parens
+        - match: '&&|\|\||!'
+          scope: keyword.operator.logical.pattern
+        - match: '\b(true|false)\b'
+          scope: const.language.pattern
+        - match: '({{name}})'
+          scope: constant.other.flag.pattern
+        - include: option_done
+    - match: '\b(else$|endif)\b'
+      scope: keyword.control.preprocessor.pattern
+      push: option_done
+    - match: '\b(error|warning)\b\s*(.*)'
+      captures:
+        1: keyword.other.preprocessor.pattern
+        2: string.unquoted.pattern
+    - match: '\b(line)\s+(default|hidden)\b'
+      captures:
+        1: keyword.other.preproccesor.pattern
+        2: keyword.other.preproccesor.pattern
+      push: option_done
+    - match: '\b(line)\s+(\d*)\s+((").*("))?\b'
+      captures:
+        1: keyword.other.preprocessor.pattern
+        2: constant.numeric.pattern
+        3: string.quoted.double.pattern
+        4: punctuation.definition.string.begin.pattern
+        5: punctuation.definition.string.end.pattern
+      push: option_done
+    - match: '\b(pragma)\s+(checksum)\s+'
+      captures:
+        1: keyword.other.preprocces.pattern
+        2: keyword.other.preprocces.pattern
+      push:
+        - meta_scope: string.quoted.double.hash.pattern
+        - match: '"{'
+          scope: constant.numeric.pattern
+        - match: '}"'
+          scope: punctuation.definition.string.end.pattern
+          pop: true
+        - match: \.
+          scope: invalid.illegal.pattern
+          pop: true
+    - match: '"'
+      scope: punctuation.definition.string.begin.pattern
+      push: string
+    -include: option_done
+
+  - match: '(pragma)\s+(warning)\b'
+    captures:
+      1: keyword.other.preprocces.pattern
+      2: keyword.other.preprocces.pattern
+    push:
+      - match: '\b(disable|restore)\b(?:\s+([\p{L}_-]+))'
+        captures:
+          1: keyword.other.preprocces.pattern
+          2: string.unquoted.warning.pattern
+      - include: comments
+      - match: '$'
+        pop: true
+
+  # Pops out at the end of the line and handles comments.
+  # Marks the rest of the line as invalid.
+  option_done:
+    - include: comments
+    - match: '$'
+      pop: true
+    - match: '\S'
+      scope: invalid.illegal.pattern
+
   main:
-    - include: global
+    - include: needs_declaration # includes app space
+    - include: object_declaration
+    - include: app_space_declaration
+    - include: delegate_declaration
+    - include: enum_declaration
+    - include: test_set_declaration
+    - match: (?=\S)
+      push:
+        - match: (?=\b(?:Object|Delegate|Application))\b
+      pop: true
+    - include: line_of_code
 
-  globals:
-    - include: imports
-    - include: functions
-    - include: statements
+  needs_declaration:
+    - match: '^(Needs)\s+(?={{name}}\s+(As)\s+)'
+      captures:
+        1: keyword.control.import.pattern
+        2: meta.path.pattern
+        3: keyword.control.import.pattern
+      push: needs_namespace
 
-  statements:
-    - include: expressions-early
-    - include: initializers
-    - include: block
-    - match: \b(Object)\s+({{identifier}})\s+(Of)\s+({{}})
+  namespace_alias:
+    - match: '^(Redifine)\s(?:(Global)|({{name}}))\s(-->)\s'
+      captures:
+        1: keyword.control.import.pattern
+        2: support.namespace.pattern
+        3: variable.other.namespace.pattern
+        4: punctuation.accessor.double-colon.namespace.pattern
+        5: variable.other.namespace.pattern
+      push: needs_namespace
+
+  needs_namespace:
+    - include: namespace_alias
+    - match: '{{name}}'
+      scope: meta.path.pattern
+      pop: true
+    - include: option_done
+
+  app_space_declaration:
+    - match: '^(Application Scope)\s+'
+      scope: storage.type.namespace.pattern
+      push:
+        - meta_scope: meta.namespace.pattern
+        - match: '(?={{name}}(\.{{name}})*)'
+          push:
+            - meta_content_scope: entity.name.namespace.pattern
+            - match: '{{name}}'
+            - match: '\.'
+              scope: punctuation.separator.namespace.cs
+            - match: '$'
+              pop: true
+        - match: ''
+          scope: section.block.begin.pattern
+          set:
+            - meta_scope: meta.namespace.pattern meta.block.pattern
+            - match: '^(End Application Scope)'
+              scope: storage.type.namespace.pattern
+              pop: true
+            - include: option_done
+            - include: main
+        - match: '(?=\S)'
+
+  application_declaration:
+    - match: '^(Application)\s({{name}})(?:\s+({{comments}}))?$'
+      captures:
+        1: storage.type.class.pattern
+        2: entity.name.application.pattern # new!!!
+      push: application_signature # new!!
+
+
+  object_declaration:
+    - match: '^(?:\b(Public|)?\s)?\b(Object)\s({{name}})\s(Of)\s({{name}})(?:\s(In)\s({{name}}))?\b$'
+      captures:
+        1: storage.modifier.access.pattern
+        2: storage.type.class.pattern
+        3: entity.name.class.pattern
+        4: storage.type.class.pattern
+        5: entity.name.class.pattern
+        6: storage.type.class.pattern
+        7: entity.name.class.pattern
+      push: [class_signature, data_type_signature]
+    - match: '^(?:\b(Public|)?\s)?\b(Enum)\s({{name}})\b({{comments}})?$'
+      captures:
+        1: storage.modifier.access.pattern
+        2: storage.type.class.pattern
+        3: entity.name.class.pattern
