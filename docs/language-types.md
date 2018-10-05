@@ -86,7 +86,7 @@ Variables are by default immutable, but may be decalred as mutable using the `Mu
 
 #### Comments
 
-Comments are defined with the standard C syntax of `/*  */` for block comment and `//` for singe-line comments.  Single-line comments may be entered anywhere in a line, but all other text after the beginning of the comment to the end of the line are not compiled.  Block comment may be inserted anywhere and only affect the contents delimited by the block comment tags. 
+Comments are defined with the standard C syntax of `/*  */` for block comment and `//` for singe-line comments.  Single-line comments may be entered anywhere in a line, but all other text after the beginning of the comment to the end of the line are not compiled.  Block comment may be inserted anywhere and only affect the contents delimited by the block comment tags.
 
 #### Variable Keywords
 
@@ -109,7 +109,7 @@ Set node Of Pair = SomeBag.Current
 Mutable index Of Number Bounded 10 To 20 = 10
 
 /*
-Accessing the values of an `Numeration` requires specifying the Enumeration as the Type and the key is inferred from the available keys of the Enumeration.  The actual type of the value is a `EnumNode`. 
+Accessing the values of an `Numeration` requires specifying the Enumeration as the Type and the key is inferred from the available keys of the Enumeration.  The actual type of the value is a `EnumNode`.
 */
 Mutable action Of SomeEnumeration = FirstValue
 ```
@@ -254,12 +254,14 @@ Private Property X to _a Add _offset
 Private Number Bump
     _x = _x + 1
     Return _x
-```
+
+
 ### Objects
 
 Objects in Pattern are specializations of any Type, including Primitive Types, for a specific `Domain`. and are declared using the `In`, `Object` and `End Object` keywords.
 
 ```pattern
+
 // Defines an implementation of Node in MyDomain named MyObject.
 Object MyObject Of Node In MyDomain
 
@@ -284,6 +286,7 @@ Visible Me SetX Val as Number
 Public Property Current To _x
 
 End Object
+
 ```
 
 ### Abstractions
@@ -295,6 +298,7 @@ Abstractions can `Specialize` `Public` or `Visible` methods or properties of the
 Abstractions can `Replace` `Visible` Methods or Properties of the base class using the `Replace` keyword which makes them Public.
 
 ```pattern
+
 Object MyAbstraction Of MyObject
 
     Replace Reset
@@ -302,4 +306,5 @@ Object MyAbstraction Of MyObject
       Return
 
 End Object
+
 ```

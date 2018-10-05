@@ -33,7 +33,7 @@ Public String DescribeRelationship y Of Number
             msg = "No other comparisons matched."
         Error
             msg = "Error: {LastError} occured."
-            // Error block are good candidates to escape the scope 
+            // Error block are good candidates to escape the scope
             // by rethrowing them.
             Rethrow
     End Compare
