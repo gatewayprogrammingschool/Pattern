@@ -39,7 +39,7 @@ All primitives of Pattern are immutable by default.  The `mutable` operator allo
   * ContainsExlusive
   * DoesNotContainExclusive
 * `Character` - A single UTF-16 character.
-* `Text` - The representation of textual (`Character`) data. Text is stored as an `Array` of `Character` values.  Text can be acessed via a zero terminated sequence, a length-specified sequence, or a raw array of characters.
+* `String` - The representation of textual (`Character`) data. Text is stored as an `Array` of `Character` values.  Text can be acessed via a zero terminated sequence, a length-specified sequence, or a raw array of characters.
 * `Date` - The representation of an near-exact point in time.  This type is constructed with the same structure as a number where the whole number represents the number of seconds since January 1 of year zero.  The second 64-bits represent fractional seconds, giving Pattern the ability to represent a very fine point in time.  All values stored in the `Date` type are UTC.
 * `Place` - The representaion of a physical location.  The `Place` type provides the following values...
   * Local Time
@@ -177,9 +177,9 @@ Being an expressive language, Pattern allows for operators that have two keyword
 |Replace Last|!>|Replace Last|String|
 |Replace Set|!(Array(String))|Replace Set|Array|
 |Substring|((#[,#]))|Substring(#[,#])|String|
-|First Index Of|<(""[,""]+)|First|Number|
-|Last Index Of|>(""[,""]+)|Last|Number|
-|All Indexes Of|=(""[,""]+)|Indexes|Array|
+|First Index Of|<<|First|Number|
+|Last Index Of|>>|Last|Number|
+|All Indexes Of|><|Indexes|Array|
 
 ### Properties
 

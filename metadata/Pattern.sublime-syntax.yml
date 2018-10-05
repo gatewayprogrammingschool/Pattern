@@ -7,8 +7,9 @@ file_extensions:
 first_line_match: "Pattern File"
 scope: source.pattern
 variables:
-  number_number: (?<integer>[0-9]+)
+  number_number: (?<number>(?<wholenumber>\d+)(?<decimal>\.?)(?<fractionalnumber>\d*))
   number_hex: (?<hexvalue>(?<token>(?:0[xX]+)|[$])(?<value>(?(token)[a-fA-F0-9]+)))
+  string: (?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))
 
   bool_op_equality: (?:==|Is)
   bool_op_logical_and: (?:&&|And)
@@ -28,21 +29,29 @@ variables:
   math_op_power: (?<power>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\^)(?:\s*)(?<rightvalue>[\d]+))
   math_op_root: (?<root>(?<leftvalue>[\d]+)(?:\s*)(?<operator>\#)(?:\s*)(?<rightvalue>[\d]+))
 
-  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_remove_first: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_remove_first: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_remove_last: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_remove_set: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_replace_first: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_replace_last: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_replace_set: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
-  string_op_concatenation: ?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_concatenation: (?<left>{{string}})(?<operator>(?:\s*\+\+\s*))(?<right>{{string}})
+  string_op_remove_all: (?<left>{{string}})(?<operator>(?:\s*\-\-\s*))(?<right>{{string}})
+  string_op_remove_first: (?<left>{{string}})(?<operator>(?:\s*\-\<\s*))(?<right>{{string}})
+  string_op_remove_last: (?<left>{{string}})(?<operator>(?:\s*\-\>\s*))(?<right>{{string}})
+  #string_op_remove_set: (?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_replace_all: (?<left>{{string}})(?<operator>(?:\s*\!\!\s*))(?<right>{{string}})
+  string_op_replace_first: (?<left>{{string}})(?<operator>(?:\s*\!\<\s*))(?<right>{{string}})
+  string_op_replace_last: (?<left>{{string}})(?<operator>(?:\s*\!\>\s*))(?<right>{{string}})
+  #string_op_replace_set: (?(DEFINE)(?<quote>["])(?<notquote>[^"]*)(?<string>(?P>quote)(?P>notquote)(?P>quote)))(?<string1>(?P>string))(?<operator>(?:\s*\+\+\s*))(?<string2>(?P>string))
+  string_op_substring: (?(DEFINE)(?<open>\()(?<close>\))(?<number>\d+)(?<operator>(?:\,)))(?<substring>(?P>open){2}(?<number1>(?P>number))(?P>operator)(?<number2>(?P>number))(?P>close){2})
+  string_op_first_index_of: (?<left>{{string}})(?<operator>(?:\s*\<\<\s*))(?<right>{{string}})
+  string_op_last_index_of: (?<left>{{string}})(?<operator>(?:\s*\>\>\s*))(?<right>{{string}})
+  string_op_all_index_of: (?<left>{{string}})(?<operator>(?:\s*\>\<\s*))(?<right>{{string}})
 
-  identifier: '\b[[:alpha:]_][[:alnum:]_]*\b'
-  type_chars: '[[:alnum:]\s,._*&<>\[\]-]'
+  unicode_char: '(?:\\u\h{4}|\\U\h{8})'
+  escaped_char: '(?:\\[abfnrtv"''\\]|{{unicode_char}}|\\x[0-9a-fA-F]{1,4}|\\[0-9]{1,3})'
+
+  visibility: \b(?:public|private|visible)\b
+  base_type: (?:Type|Reference|Node|Pair|Array|Bag|Flag|Number|Guid|Logical|Character|String|Date|Place|Culture|Enumeration|EnumNode)
+  patterned_type: (?:Domain|Singleton|Facade|Model|View|Controller|Bridge|Adapter|DataStore|DataProvider|DataAdapter|DataBridge|ForeignMethod|Service|Application)
+  type_suffix: ((?:\(,*\))*)
+
+  brackets_capture: 
 
 contexts:
   main:
