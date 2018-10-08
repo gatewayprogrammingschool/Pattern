@@ -82,7 +82,7 @@ Public String Initialize
         When 1
             // Do something
             Return _args(0)
-        Other
+        Otherwise
             Throw Error(Message = "Too many arguments!")
     End Choice
 

@@ -66,13 +66,13 @@ Patterned types are types specified by the Pattern language that provide compile
 * `Controller` - A instantiatable type that contains a `Facade` that provides private static methods that that are invoked by triggers defined on a `View`.  The `Controller` only holds instance data that watches the `Triggers` of a `View`.  A `Contoller` must be scoped to a specific `Domain`.
 * `Bridge` - An abstract immutable instance type that bridges data between two `Domains`.  `Bridge` instances provide an provide map that defines the relationship of properties between at least one `Model` of each Domain.
 * `Adapter` - An abstract stateless type that exposes `Triggers` that are watched by one or more `DataBridge` instances that are the passive side of the `Adapter`. Triggers may be exposed directly or called from within static methods exposed to the active side of the `Adapter`.  An `Adapter` must be defined for a specific actor `Domain` and watcher `Domain`.
-* `DataStore` - An abstract stateful type the holds the data for a specific `Domain`.  The data is stored in an infinitely nestable `Bag` of `Node` instances where the value of each `Node` references either another `Bag` or a `Model` instance.
-* `DataProvider` - A stateful abstract type that encapsulates one or more `DataStore` instances and exposes methods that can store, retrieve or delete data within the `DataStore`. The `DataProvider` exposes `Triggers` that are watched by `DataAdapter` object that perform the CRUD operations of the data source.  
-* `DataAdapter` - A stateless abstract type that exposes basic CRUD methods to manage persistance of the `Model` instances passed to it.
-* `DataBridge` - A stateless abstract type that provides static methods, each of which are not constrained to a specific `Domain` and represent the only place in an application where `Adapter` instances are accessed.
-* `ForeignMethod` - A type representing a stateless proxy to a single outside method such as a microservice, REST call, or SOAP service call.  The output (if any) of a `ForiegnMethod` must be a `DataStore` instance that may be merged into another `DataStore`.
+* `Data Store` - An abstract stateful type the holds the data for a specific `Domain`.  The data is stored in an infinitely nestable `Bag` of `Node` instances where the value of each `Node` references either another `Bag` or a `Model` instance.
+* `Data Provider` - A stateful abstract type that encapsulates one or more `Data Store` instances and exposes methods that can store, retrieve or delete data within the `Data Store`. The `Data Provider` exposes `Triggers` that are watched by `Data Adapter` object that perform the CRUD operations of the data source.  
+* `Data Adapter` - A stateless abstract type that exposes basic CRUD methods to manage persistance of the `Model` instances passed to it.
+* `Data Bridge` - A stateless abstract type that provides static methods, each of which are not constrained to a specific `Domain` and represent the only place in an application where `Adapter` instances are accessed.
+* `Remote` - A type representing a stateless proxy to a single outside method such as a microservice, REST call, or SOAP service call.  The output (if any) of a `Foriegn Method` must be a `Data Store` instance that may be merged into another `Data Store`.
 * `Service` - A statefull type that extends a `View` that listens for requests for data manipulation and persistance.
-* `Application` - A stateful representation of the data, data manipulation, and exposure of data to actors (input) and receivers (output).  An application contains an ApplicationState `Singleton` which exposes the public entry points (one or more `Service` instances) into the application.  The `Application` exposes a static methed named `EntryPoint` that exposes the traditional __main__ entry point for an `Application`.
+* `Application` - A stateful representation of the data, data manipulation, and exposure of data to actors (input) and receivers (output).  An application contains an ApplicationState `Singleton` which exposes the public entry points (one or more `Service` instances) into the application.  The `Application` exposes a static methed named `Entry Point` that exposes the traditional __main__ entry point for an `Application`.
 
 Non-Primitive Types in Pattern must extend a Patterned Type and must follow the Domain constraints of the base type.
 
@@ -247,6 +247,7 @@ Visible Number BumpBy Factor To Number
 Hides a Property or Method from outside code.
 
 ```pattern
+
 // Declares a private property X that returns the result of _a + _offset.
 Private Property X to _a Add _offset
 
@@ -254,7 +255,7 @@ Private Property X to _a Add _offset
 Private Number Bump
     _x = _x + 1
     Return _x
-
+```
 
 ### Objects
 
@@ -295,13 +296,13 @@ All Patterned Types are intended to be implemented directly, but those implement
 
 Abstractions can `Specialize` `Public` or `Visible` methods or properties of the base class using the `Specialize` keyword.  Specialized Methods or Properties may not be more accessible than their base-class's definition.  
 
-Abstractions can `Replace` `Visible` Methods or Properties of the base class using the `Replace` keyword which makes them Public.
+Abstractions can `Replaces` `Visible` Methods or Properties of the base class using the `Replace` keyword which makes them Public.
 
 ```pattern
 
 Object MyAbstraction Of MyObject
 
-    Replace Reset
+    Replaces Reset
       SetX 1
       Return
 
