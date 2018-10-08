@@ -62,12 +62,13 @@ variables:
 
   reserved_objects: '(?:Object|Delegate|Application[ ]Scope|Application|Enumeration|Test[ ]Set|Test|Singleton|Model|Controller|Facade|Bridge|Adapter|Data[ ]Store|Data[ ]Provider|Data[ ]Adapter|Data[ ]Bridge|Remote|Service)'
 
-  brackets_capture: '((\())(,*)(\))'  
   start_char: '(?:{{unicode_char}}|[_\p{L}])'
   other_char: '(?:{{unicode_char}}|[_0=9\p{L}])'
   name_normal: '{{start_char}}{{other_char}}*\b'
   cap_name: '(\p{Lu}{{other_char}})'
   name: '(?:@{{reserved}}@{{base_type}}|@var|@?{{name_normal}})'
+
+  type_separator: '>'
 
 contexts:
   prototype:
@@ -179,321 +180,351 @@ contexts:
       scope: invalid.illegal.pattern
 
   main:
-    - include: needs_declaration # includes app space
-    - include: object_declaration
-    - include: app_space_declaration
-    - include: delegate_declaration
-    - include: enum_declaration
-    - include: test_set_declaration
-    - match: '(?=\S)'
+    - include: redefined_declaration
+    - include: needs_declaration
+    - include: app_scope_declaration
       push:
-        - match: '\b(?={{reserved_objects}})\b'
-      pop: true
-    - include: line_of_code
+      - include: application_declaration
+        push:
+        - include: class_declaration
+        - include: delegate_declaration
+        - include: enum_declaration
+        - include: test_set_declaration
+        - match: '(?=\S)'
+          push:
+            - match: '\b(?={{reserved_objects}})\b'
+          pop: true
+        - include: line_of_code
 
   needs_declaration:
-    - match: '^(Needs)[ ]({{name}})(?:[ ](As)[ ]({{name}}))?'
+    - match: '^(Needs)[ ]({{name}})(?:[ ](As)[ ]({{named_type}}))?{.}'
       captures:
         1: keyword.control.import.pattern
         2: meta.path.pattern
         3: keyword.control.import.pattern
         4: meta.path.pattern
+        5: punctuation.definition.tag.end.pattern
       push: needs_namespace
 
-  namespace_alias:
-    - match: '^(Redefine)[ ]({{name}})[ ](As)[ ]({{name}})'
+  redefined_declaration:
+    - match: '^(Redefine)[ ]({{name}})[ ](As)[ ](?={{named_type}})(\.)'
       captures:
         1: keyword.control.import.pattern
         2: variable.other.namespace.pattern
         3: keyword.control.import.pattern
         4: variable.other.namespace.pattern
+        5: punctuation.definition.tag.end.pattern
       push: redefined_namespace
+      pop: true
 
   redefined_namespace:
-    - match: '{{name}}'
+    - match: '{{named_type}}'
       scope: variable.other.namespace.pattern
       pop: true
-    - include: option_done
 
-  app_space_declaration:
-    - match: '^(Application[ ]Scope)'
+  app_scope_declaration:
+    - match: '^\b(Begin)\b[ ]'
       scope: storage.type.namespace.pattern
       push:
         - meta_scope: meta.namespace.pattern
-        - match: '(?=({{name}})(?:(\.)({{name}}))*)'
+        - match: '(?={{name}}*)(?:(\.)|(?1))({{name}}+)'
           captures:
-            1: entity.name.namespace.pattern
+            1: variable.other.namespace.pattern
             2: punctuation.accessor.dot.pattern
-            3: entity.name.namespace.pattern
+            3: variable.other.namespace.pattern
           push:
             - meta_content_scope: entity.name.namespace.pattern
             - match: '{{name}}'
-            - match: '\.'
+            - match: \.
               scope: punctuation.separator.namespace.pattern
-            - match: '{{name}}'
+            - match: '[ ](As[ ]Application[ ]Scope)(\.)'
+              captures:
+                1: constant.other.pattern
+                2: punctuation.definition.tag.end.pattern
               pop: true
-        - match: '\n'
-          scope: section.block.begin.pattern
+        - match: ''
+          scope: punctuation.section.block.begin.pattern
           set:
             - meta_scope: meta.namespace.pattern meta.block.pattern
-            - match: '^(End Application Scope)'
-              scope: storage.type.namespace.pattern
+            - match: '^End[ ]Application[ ]Scope\.'
+              scope: punctuation.section.block.end.pattern
               pop: true
-            - include: option_done
             - include: main
-    - match: '(?=\S)'
-      pop: true
-    - include: option_done
+        - match: (?=\S)
+          pop: true
 
   application_declaration:
-    - match: '^(Application)'
+    - match: '^[ ]{2}(Application)'
       scope: storage.type.class.pattern
       push:
         - meta_scope: meta.namespace.pattern
-        - match: '\b({{name}})\b'
-        - match: '\n'
-          scope: section.block.begin.pattern
+        - match: '\b({{name}})\b(\.)'
+          captures:
+            1: section.block.begin.pattern
+            2: punctuation.definition.tag.end.pattern
           set:
             - meta_scope: meta.namespace.pattern meta.block.pattern
-            - match: '^(End Application)'
-              scope: storage.type.class.pattern
+            - match: '^[ ]{2}(End[ ]Application)(\.)'
+              captures:
+                1: storage.type.class.pattern
+                2: punctuation.definition.tag.end.pattern
               pop: true
-            - include: option_done
-    - match: '(?=\S)'
+    #- match: '(?=\S)'
       pop: true
-    - include: option_done
 
-  object_declaration:
-    - match: '^(?:\b(Public)[ ]\b)?\b({{reserved_objects}})[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})\b'
-      captures:
-        1: storage.modifier.access.pattern
-        2: storage.type.class.pattern
-        3: entity.name.class.pattern
-        4: storage.type.other.pattern
-        5: entity.name.class.pattern
-        6: entity.name.class.pattern
-      push: [class_signature, class_type_signature]
-    - match: '^(?:(?:(?:(Public)[ ])?))(Enumeration)[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})'
+  enum_declaration:
+    - match: '^[ ]{2}(?:(?:(?:(Public)[ ])?))(Enumeration)[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})(\.)'
       captures:
         1: storage.modifier.access.pattern
         2: storage.type.class.pattern
         3: entity.name.class.pattern
         4: storage.type.class.pattern
         5: entity.name.class.pattern
+        6: punctuation.definition.tag.end.pattern
       push:
         - meta_content_scope: meta.enum.pattern
-        - match: '\n'
+        - match: ''
           set:
             - meta_scope: meta.enum.body.pattern meta.block.pattern
-            - match: '^(End[ ]Enumeration)'
-              scope: storage.type.class.pattern
-              set:
-                - include: option_done
-                  pop: true
-            - include: attribute                
-            - match: '({{name}})[ ](=)(?:[[:blank:]])(name)[ ](=)'
+            - match: '^[ ]{2}(End[ ]Enumeration)(\.)'
+              captures:
+                1: storage.type.class.pattern
+                2: punctuation.definition.tag.end.pattern
+              pop: true
+            - match: '^[ ]{4}(Enum[ ]Value)[ ]({{name}})[ ](\=)'
               captures: 
                 1: constant.other.enum.pattern
-                2: keyword.operator.assignment.pattern
+                2: variable.other.member.pattern
+                3: keyword.operator.assignment.pattern
               push: line_of_code_in
-            - include: option_done
 
   delegate_declaration:
-    - match: '^\b(Delegate)\b'
+    - match: '^[ ]{2}\b(Delegate)\b'
       captures:
         1: storage.type.delegate.pattern
       push: delegate_type
-    - include: option_done
 
   delegate_type:
     - meta_scope: meta.delegate.pattern
     - match: '[ ]'
       push: delegate_name
     - include: type
+    - match: '\.'
+      scope: punctuation.definition.tag.end.pattern
       push: delegate_params
       pop: true
 
   delegate_name:
-    - match: '({{name}})([ ])'
+    - match: '({{name}})[ ](Of[ ]Type)[ ]'
       captures:
         1: meta.delegate.pattern variable.other.member.delegate.pattern
-        2: meta.delegate.parameters.pattern punctuation.section.parameters.begin.pattern
+        2: storage.type.delegate.pattern
       pop: true
 
   delegate_params:
-    - meta_content_scope: meta.delegate.parameters.pattern
-    - match: '\b(Parameters)\b[ ]'
-      scope: punctuation.section.paramters.end.pattern
-    - include: parameters
+    - meta_content_scope: meta.method.parameters.pattern
+    - match: '^[ ]{2}(End Parameters)(\.)' # end of parameters
+      captures:
+        1: storage.type.pattern
+        2: meta.delegate.parameters.pattern punctuation.section.parameters.end.pattern
+      pop: true
+    - match: '^[ ]{2}(Parameters)(\.)' # some text - means there's another parameter
+      captures:
+        1: storage.type.pattern
+        2: meta.delegate.parameters.pattern
+        3: punctuation.definition.tag.end.pattern
+      push: delegate_param
+
+  delegate_param:
+    - match: '^[ ]{4}Parameter[ ]'
+      scope: storage.type.pattern
+    - match: '{{name}}' # name of parameter
+      scope: variable.parameter.pattern
+    - match: '[ ]Of[ ]Type[ ]'
+      scope: storage.type.pattern
+      push: type
+    - match: '[ ]Default[ ]' # default parameter value follows
+      scope: storage.type.pattern
+      push: line_of_code_in
+    - match: '\.' #end of parameter
+      scope: punctuation.definition.tag.end.pattern
       pop: true
 
-  class_signature:
-    - meta_scope: meta.class.pattern
-    - match: '^(?:(?:(?:(Public)[ ])?))({{reserved_objects}})[ ](name)[ ](In[ ]Domain)[ ](name)'
-      capture:
+  class_declaration:
+    - match: '^[ ]{2}(?:\b(Public)[ ]\b)?\b({{reserved_objects}}|{{named_type}})[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})\b(\.)'
+      captures:
         1: storage.modifier.access.pattern
         2: storage.type.class.pattern
         3: entity.name.class.pattern
         4: storage.type.class.pattern
         5: entity.name.class.pattern
-      set: class_body
-    - include: option_done
+        6: punctuation.definition.tag.end.pattern
+      push: class_body
+      pop: true
 
   class_body:
-    - match: '\n'
-      scope: punctuation.section.block.begin.pattern
+    - match: '^[ ]{2}(Body)(\.)'
+      captures:
+        1: constant.other.pattern
+        2: punctuation.section.block.begin.pattern
       push:
         - meta_scope: meta.block.pattern
+        - include: field_signature
+        - include: property_signature
+        - include: method_signature
+        - include: event_signature
+        - match: '^[ ]{2}(End[ ]Body)(\.)'
+          captures: 
+            1: storage.type.class.pattern
+            2: punctuation.section.block.end.pattern
           pop: true
-        - match: '^$'
-          scope: punctuation.section.block.begin.pattern
-          push:
-            - meta_scope: meta.block.pattern
-            - match: '\b(End[ ]Sub[]Type)\b'
-              scope: storage.type.class.pattern
-            - include: option_done
-    - match: '(?=\S)'
+    - match: '\S*'
+      scope: invalid.illegal
+      pop: true
+
+  event_signature:
+    - match: '^[ ]{4}(Event)[ ]({{name}})[ ](Publishes)[ ]({{named_typ}})'
+      captures:
+        1: storage.type.pattern
+        2: variable.other.pattern
+        3: storage.type.pattern
+        4: variable.other.member.delegate.pattern
+      pop: true
+
+  field_signature:
+    - match: '(?=^[ ]{4}(?:Constant|Mutable)[ ]_{{name}}[ ]Of[ ]Type[ ]{{named_type}}'
+      push: field_declaration
+      pop: true
+
+  field_declaration:
+    - match: '^[ ]{4}'
+    - match: '\bConstant|Mutable\b'
+      scope: storage.type.pattern
+    - match: '_{{name}}' # name of field
+      scope: variable.parameter.pattern
+    - match: '\bOf[ ]Type\b'
+      scope: storage.type.pattern
+      push: type
+    - match: '\bDefault\b' # default parameter value follows
+      scope: storage.type.pattern
+      push: line_of_code_in
+    - match: '\.' #end of parameter
+      pop: true 
+
+  property_signature:
+    - match: '(?=^[ ]{4}(?:Public[ ])?Property[ ]{{name}}[ ]To[ ]{{named_type}}\.)'
+      push: property_declaration
+      pop: true
+
+  property_declaration:
+    - match: '^[ ]{4}'
+    - match: '\bPublic\b?'
+      scope: storage.type.pattern
+    - match: '\bProperty\b'
+      scope: storage.type.pattern
+    - match: '\b{{name}}\b'
+      scope: variable.other.pattern
+    - match: '\bTo\b'
+      scope:  storage.type.pattern
+      push: line_of_code_in
+    - match: '\.'
+      scope: punctuation.definition.tag.begin.pattern
+      pop: true 
+
+  method_signature:
+    - meta_scope: meta.method.pattern
+    - match: '(?=^[ ]{4}(?:Public[ ])?(?:{{reserved_visibility}}[ ])?Method[ ]{{name}}[ ]Returns[ ]{{named_type}}\.)'
+      push: [method_params, method_declaration]
+    - match: '^[ ]{4}(?:(?:(?:(?:({{reserved_visibility}}))?)[ ](Constructor)(\.)'
+      captures:
+        1: storage.modifier.pattern
+        2: entity.name.function.constructor.cs
+        3: meta.method.parameters.cs punctuation.section.parameters.begin.cs
+      push: [constructor_params]
+    - match: '^[ ]{4}(End[ ]Method)(\.)'
+      captures:
+        1: constant.other.pattern
+        2: punctuation.section.parameters.end.cs
       pop: true
 
   method_declaration:
-    - match: '^(?:(?:(?:(?:[[:blank:]]+({{reserved_visibility}}))?)(?:(?:[[:blank:]]+(Abstract|Specialize|Replaces|Asynchronous|Event))?))?)(?:[[:blank:]]+({{name}})[ ](Of Type)[ ]({{name}}))'
-      captures:
-        1: storage.modifier.access.pattern
-        2: storage.modifier.access.pattern
-        3: variable.other.pattern
-        4: entity.name.class.pattern
+    - meta_scope: meta.method.pattern
+    - match: '^[ ]{4}'
+    - match: '\bPublic\b'
+      scope: storage.type.pattern
+    - match: '\b{{reserved_visibility}}\b'
+      scope: storage.type.pattern
+    - match: '\bMethod\b'
+      scope: storage.type.pattern
+    - match: '\b{{name}}\b'
+      scope: variable.other.pattern
+    - match: '\bReturns\b'
+      scope:  storage.type.pattern
+    - match: '\b{{named_type}}\b'
+      scope: variable.other.namespace.pattern
+    - match: '\.'
+      scope: punctuation.definition.tag.begin.pattern
       push:
-        - meta_content_scope: meta.method.parameters.pattern
-          push: 
-            push: method_params
-            set: method_body_transition
-            pop: true
-        - include: option_done
-    - match: '(?=\S)'
+      - meta_content_scope: meta.method.parameters.pattern
+        push: [method_body_transition, method_params]
       pop: true
 
-  method_body_transition:
-    - match: '\n'
-      set: method_body
+  constructor_params:
+    - meta_content_scope: meta.instance.pattern meta.group.pattern
+    - include: parameters_list
 
   method_params:
     - meta_content_scope: meta.method.parameters.pattern
-    - match: '\n' # end of parameters
-      scope: meta.method.parameters.pattern punctuation.section.parameters.end.pattern
-      pop: true
-    - match: '(?<=\S)(?!(?:(,)[ ]|[ ])({{name}}))[ ](Of[ ]Type)[ ]({{name}})' # some text - means there's another parameter
-      captures:
-        1: punctuation.separator.parameter.function.pattern
-        2: variable.parameter.pattern
-        3: storage.type.pattern
-        4: storage.type.variable.pattern
-      push: [method_param, method_param_type]
+    - include: parameters_list
 
-  method_params_bracket:
-    - meta_content_scope: meta.brackets.pattern
-    - match: '\)' # end of array parameter
-      scope: meta.brackets.pattern punctuation.section.brackets.end.pattern
+  parameters_list:
+    - match: '^[ ]{4}(Parameters)\.' # some text - means there's another parameter
+      captures:
+        1: storage.type.pattern
+        2: meta.method.parameters.pattern
+      push:
+        - meta: meta.method.constructor.pattern
+        - include: method_param      
+    - match: '^[ ]{4}(End Parameters)(\.)' # end of parameters
+      captures:
+        1: storage.type.pattern
+        2: meta.method.parameters.pattern punctuation.section.parameters.end.pattern
+      push: method_body
       pop: true
-    - match: '(?=\S)' # some text - means there's another parameter
-      push: [method_param, method_param_type]
 
   method_param:
+    - match: '^[ ]{6}Parameter[ ]'
+      scope: storage.type.pattern
     - match: '{{name}}' # name of parameter
       scope: variable.parameter.pattern
-    - match: '=' # default parameter value follows
-      scope: keyword.operator.assignment.default-value.pattern
+    - match: '[ ]Of[ ]Type[ ]'
+      scope: storage.type.pattern
+      push: type
+    - match: '{{named_type}}'
+    - match: '[ ]Default[ ]' # default parameter value follows
+      scope: storage.type.pattern
       push: line_of_code_in
-    - match: ',[ ]' # ready for next parameter
-      scope: punctuation.separator.parameter.function.pattern
-      pop: true
-    - match: '(?=\n)' #end of parameter
-      pop: true
-
-  method_param_type:
-    - include: attribute
-    - match: '(?=[^[ ]\[])' # must not be leading to something else
-      set:
-      - match: '[ ]\b(Parameters)[ ]' # parameter modifier
-        captures:
-          1: storage.modifier.parameter.pattern
-      - match: '[ ]'
-        pop: true
-      - include: type
-    - match: '(?=(?:\)|(?:\)\)))' #end of parameter
-      pop: true
-
-  constructor_prebody:
-    - meta: meta.method.constructor.pattern
-    - match: ':' # Calls another constructor first
-      scope: meta.method.constructor.prebody.pattern punctuation.separator.function.pattern
-      set:
-        - match: '[ ]' # Separator
-          scope: meta.method.constructor.prebody.pattern
-        - match: '(Me:Base)[ ]' # Either me or the super-class
-          captures:
-            1: variable.language.pattern
-            2: meta.group.pattern punctuation.section.group.begin.pattern
-          set: [constructor_initializer, arguments]
-        - match: '(?=^)' # begin of body
-          set: method_body
-    - match: '(?=^|Lambda)' # begin of body or Lambda
-      set: method_body
-
-  constructor_initializer:
-    - meta_scope: meta.method.constructor.prebody.pattern
-    - meta_content_scope: meta.group.pattern
-    - match: '\)' # End of section
-      scope: punctuation.section.group.end.pattern
-    - include: option_done
-      set: constructor_initializer_after
-
-  constructor_initializer_after:
-    - meta_content_scope: meta.method.constructor.prebody.pattern
-    - match: '(?=^\t)' # begin method body - must start indented one tab
-      set: method_body
-    - match: '(?=\S)' # Other non-whitespace text - not sure what this does
+    - match: '\.' #end of parameter
       pop: true
 
   method_body:
-    - meta_scope: meta.method.pattern
-    - match: '(?=Lambda)'
+    - meta_scope: meta.method.body.pattern
+    - match: '(?:^[ ]{6}(Method[ ]Body)(\.))'
+      captures:
+        1: constant.other.pattern
+        2: punctuation.definition.tag.begin.pattern
       scope: storage.type.function.pattern
       set:
-        - meta_content_scope: meta.method.pattern
-        - include: line_of_code_in
-    - match: '(?=^Method\sBody)'
-      set:
-        - match: '^Method\sBody' # Begin tag for methods
-          scope: storage.type.function.pattern
-          set:
-            - meta_scope: meta.method.body.pattern meta.block.pattern
-            - match: 'End\Method' # End tag for methods
-              scope: storage.type.function.pattern
-              pop: true
-            - include: option_done
-            - include: code_block_in
-        - include: option_done
+        - meta_scope: meta.method.body.pattern meta.block.pattern
+        - match: '^[ ]{6}(End[ ]Method)(\.)' # End tag for methods
+          captures:
+            1: constant.other.pattern
+            2: punctuation.definition.tag.begin.pattern
           pop: true
-
-  method_accessor:
-    - meta_scope: meta.property.pattern
-    - match: '\sTo' # Link to the target of the property
-      scope: meta.block.pattern storage.type.function.pattern
-      set:
-        - meta_content_scope: meta.property.pattern
-        - match: '[ ]' # Space after 'To'
-          scope: keyword.operator.assignment.pattern
-          set:
-            - meta_content_scope: meta.property.pattern
-            - include: line_of_code_in
-        - match: '(?=\S)'
-          pop: true
-    - match: '\S' # Extra text here is illegal
-      scope: invalid.illegal.pattern
-      pop: true
+        - include: code_block_in
 
   code_block_in:
-    - match: '(?=\S)' # If there's any text, it is a line of code.
+    - match: '(?=^[ ]{6}[ ]*\S)' # If there's any text, it is a line of code.
       push: line_of_code
 
   line_of_code:
@@ -501,7 +532,7 @@ contexts:
     - match: '\b(If)[ ]' # Start Conditional
       captures:
         1: keyword.control.condition.if.pattern
-      set: [else_block, if_block, if_condition]
+      set: [end_if, else_block, if_block, if_condition]
     - match: '\b(Choice)[ ]' # Choice Conditional
       captures:
         1: keyword.control.flow.switch.pattern
@@ -544,7 +575,7 @@ contexts:
     - match: '\b(Throw|Rethrow)\b'
       scope: keyword.control.trycatch.throw.pattern
       set: line_of_code_in
-    - match: '(Set|Mutable)[ ]({{name}})[ ](Of)[ ]({{name}})[ ](=)'
+    - match: '(Constant|Mutable)[ ]({{name}})[ ](Of)[ ]({{named_type}})[ ](=)[ ]'
       captures:
         1: storage.type.variable.pattern
         2: variable.other.member.pattern
@@ -552,99 +583,37 @@ contexts:
         4: storage.type.variable.pattern
         5: keyword.operator.assignment.variable.pattern
       set: line_of_code_in
-    - include: lambdas
-    - include: namespace_alias
-    - match: '\.'
+    - include: app_scope_alias
+    - match: '{{\.}}'
       scope: punctuation.accessor.dot.pattern
-    - match: '(?=\S)'
+    - match: '^[ ]{6}[ ]*(?=\S)'
       set: line_of_code_in
-
-  lambdas:
-    - match: '({{name}})[ ](Lambda)'
-      captures:
-        1: variable.parameter.pattern
-        2: storage.type.function.lambda.pattern
-      push:
-        - meta_scope: meta.function.anonymous.pattern
-        - match: '\b(?=End Lambda)\b'
-          pop: true
-        - include: line_of_code_in
-    - match: '(Lambda)'
-      scope: meta.function.anonymous.pattern storage.type.function.lambda.pattern
-      push:
-        - meta_content_scope: meta.function.anonymous.pattern meta.group.pattern
-        - match: '{{name}}(?=[ ][\),/])'
-          scope: variable.parameter.pattern
-        - match: ','
-          scope: punctuation.separator.parameter.function.pattern
-        - match: '(\))[ ](Lambda)'
-          captures:
-            1: meta.group.pattern punctuation.section.group.end.pattern
-            2: storage.type.function.lambda.pattern
-          set:
-            - meta_content_scope: meta.function.anonymous.pattern
-            - include: option_done
-              pop: true
-            - include: line_of_code 
-  
-  member_variables_declaration:
-    - match: '='
-      scope: keyword.operator.assignment.variable.pattern
-      push:
-        - include: option_done
-          pop: true
-        - include: line_of_code_in
-    - match: '{{name}}'
-      scope: variable.other.member.pattern
-    - include: option_done
-
-  variables_declaration:
-    - match: '='
-      scope: keyword.operator.assignment.variable.pattern
-      push:
-        - include: option_done
-          pop: true
-        - include: initializer_constructor
-        - include: line_of_code_in
-    - match: '{{name}}'
-      scope: variable.other.pattern
-    - include: option_done
-      pop: true
 
   keywords:
     - match: '\b(Me|Base)\b'
       scope: variable.language.pattern
     - match: '\b(Await)\b'
       scope: keyword.control.other.pattern
-    - match: '\b(Name Of)([ ])'
+    - match: '\b(As|Is|Type Of)([ ])'
       captures:
         1: keyword.other.pattern 
         2: meta.group.pattern
     - push:
         - meta_content_scope: meta.group.pattern
-        - match: '({{base_type}})\b'
+        - match: '({{named_type}})\b'
           scope: storage.type.pattern
         - match: '(?={{name}})'
           scope: variable.other.pattern
-        - include: type
-    - match: '\b(Type Of)([ ])'
-      captures:
-        1: keyword.operator.reflection.pattern
-        2: meta.group.pattern
-      push:
-        - meta_content_scope: meta.group.pattern
-        - include: type
-    - match: '\b(As|Is)[ ]'
-      captures:
-        1: keyword.operator.reflection.pattern
-      push: type_no_space
+        - include: line_of_code_in
+        # Lots more to do here
 
   line_of_code_in:
-    - include: line_of_code_in_no_semicolon
-    - include: option_done
+    - include: line_of_code_in_no_period
+    - match: '\.'
+      scope: punctuation.terminator.statement.cs
       pop: true
 
-  line_of_code_in_no_semicolon:
+  line_of_code_in_no_period:
     - match: '\b(Value)\b'
       scope: variable.language.pattern
     - include: keywords
@@ -655,27 +624,20 @@ contexts:
     - match: '='
       scope: keyword.operator.assignment.pattern
     - include: literals
-    - match: '((?!{{reserved}})\b){{name}})([ ])'
+    - match: '(\bCall\b)[ ](?={{named_type}})'
       scope: meta.function-call.pattern
       captures:
         1: variable.function.pattern
-        2: meta.group.pattern punctuation.section.group.begin.pattern
-      push: [function_call_arguments, arguments]
+      push: [function_call_arguments, accessor_arguments]
     - match: '({{name}})(\??\()' # Possibly conditional Array
       captures:
         1: variable.other.pattern
         2: meta.brackets.pattern punctuation.section.brackets.begin.pattern
       push: accessor_arguments
-    - include: lambdas
-    - match: '({{base_type}})\b'
+    - match: '({{named_type}})\b'
       scope: storage.type.pattern
     - match: '({{reserved}})\b'
       scope: keyword.other.pattern
-    - match: '(?:(Make)|({{name}}))[ ](Global)'
-      captures:
-        1: support.namespace.pattern
-        2: support.namespace.pattern
-        3: punctuation.accessor.double-colon.namespace.pattern
     - match: '{{name}}'
       scope: variable.other.pattern
     - match: '\('
@@ -687,52 +649,18 @@ contexts:
           pop: true
         - include: lambdas
         - include: line_of_code_in_no_semicolon
-    - match: '(?:\)|,|{{reserved}})'
+    - match: '(?:\)|,|{{operations}})'
       pop: true
-
-  constructor_arguments:
-    - meta_content_scope: meta.instance.pattern meta.group.pattern
-    - match: '(?=[^\s*])'
-      pop: true
-    - match: '^'
-      scope: punctuation.section.braces.begin.pattern
-      set: initializer_constructor
-
-  function_call_arguments:
-    - meta_content_scope: meta.function-call.pattern meta.group.pattern
-    - match: ''
-      pop: true
-
-  arguments:
-    - match: '({{name}})[ ](Of[ ]Type)[ ](=)(?!=)'
-      captures:
-        1: variable.parameter.pattern
-        2: constant.other.pattern
-        3: keyword.operator.assignment.pattern
-      push: line_of_code_in
-    - match: '({{name}})(:)'
-      captures:
-        1: variable.parameter.pattern
-        2: punctuation.separator.argument.value.pattern
-      push: line_of_code_in
-    - match: ','
-      scope: punctuation.separator.argument.pattern
-    - match: '\)'
-      scope: punctuation.section.group.end.pattern
-    - include: stray_close_bracket
-    - match: '(?=\S)'
-      push:
-        - include: line_of_code_in_no_semicolon
 
   accessor_arguments:
     - meta_content_scope: meta.brackets.pattern
     - match: '({{name}})(:)'
       captures:
-        1: variable.other.paramter.pattern
+        1: variable.other.parameter.pattern
         2: punctuation.separator.accessor.pattern
     - match: ','
       scope: punctuation.separator.accessor.pattern
-    - match: '\)'
+    - match: '\.'
       scope: meta.brackets.pattern punctuation.section.brackets.end.pattern
       pop: true
     - include: line_of_code_in
@@ -741,21 +669,7 @@ contexts:
     - include: type_common
 
   type_common:
-    - include: namespace_alias
-    - match: '(Object|Application)'
-      scope: storage.type.other.pattern
-    - match: '(Of)[ ]{{base_type}}'
-      scope: storage.type.pattern
-    - match: '{{brackets_capture}}'
-      captures:
-        1: meta.brackets.pattern
-        2: punctuation.section.brackets.begin.pattern
-        3: punctuation.separator.pattern
-        4: punctuation.section.brackets.end.pattern
-    - match: '\.'
-      scope: punctuation.accessor.dot.pattern
-    - match: '(?=\)|,|Lambda'
-      pop: true
+    - include: app_scope_alias
 
   literals:
     - match: '\b(True|False|Null)'
@@ -887,48 +801,34 @@ contexts:
       scope: constant.character.escaped.pattern
     - match: '\\'
       scope: invalid.illegal.lone-escape.pattern
-
-  initializer_constructor:
-    - meta_content_scope: meta.instance.pattern meta.braces.pattern 
-    - match: '^End\sConstructor'
-      scope: meta.instance.pattern meta.braces.end punctuation.setion.braces.end.pattern 
-      pop: true
-    - match: '\n'
-      set:
-        - meta_scope: meta.block.pattern
-        - match: '^End\sConstructor'
-          scope: punctuation.section.block.end.pattern
-          pop: true
-        - include: main
-    - match: '(?=\S)'
-      set:  
-        - match: '^$'
-          pop: true
-        - include: main
     
   catch_expr:
-    - match: '(Handle)([ ])'
+    - match: '(Handle)(\.)|(?:[ ]|({{named_type}})?'
       captures:
         1: keyword.control.trycatch.catch.pattern
         2: meta.group.pattern punctuation.section.group.begin.pattern
-      push: [catch_block, var_declaration_explicit]
-    - match: 'Handle'
-      scope: keyword.control.trycatch.catch.pattern
-      push: trycatch_block
+        3: variable.other.namespace.pattern
+      push: catch_block
     - match: '(?=\S)'
       pop: true
 
+  try_block:
+    - meta_content_scope: meta.group.pattern
+    - match
+
   catch_block:
     - meta_content_scope: meta.group.pattern
-    - match: '^$'
-      scope: meta.group.pattern punctuation.section.group.end.pattern
+    - match: '^[ ]{6}[ ]*(End[ ]Handle)(\.)'
+      captures: 
+        1: storage.type.pattern
+        2: meta.group.pattern punctuation.section.group.end.pattern
       set: catch_when
 
   catch_when:
-    - match: '\bWhen\b'
+    - match: '\bHandle When\b'
       scope: keyword.control.trycatch.when.pattern
       set:
-        - match: '\n'
+        - match: '.'
           scope: punctuation.section.group.begin.pattern
           set:
             - meta_scope: meta.group.pattern
@@ -1101,7 +1001,7 @@ contexts:
       pop: true 
 
   var_declaration:
-    - match: '(Set|Mutable)[ ]({{name}})[ ]'
+    - match: '(Constant|Mutable)[ ]({{name}})[ ]'
       captures:
         1: storage.type.variable.pattern
         2: variable.other.pattern
@@ -1196,4 +1096,4 @@ contexts:
           pop: true
         - include: comments_in
         - match: '[\w\s]+|.'
-          scope: text.documentation.pattern
+          scope: text.documentation.patternf
