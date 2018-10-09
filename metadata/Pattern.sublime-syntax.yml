@@ -69,6 +69,7 @@ variables:
   name: '(?:@{{reserved}}@{{base_type}}|@var|@?{{name_normal}})'
 
   type_separator: '>'
+  line_terminator: '\.'
 
 contexts:
   prototype:
@@ -207,7 +208,7 @@ contexts:
       push: needs_namespace
 
   redefined_declaration:
-    - match: '^(Redefine)[ ]({{name}})[ ](As)[ ](?={{named_type}})(\.)'
+    - match: '^(Redefine)[ ]({{name}})[ ](As)[ ](?={{named_type}})({{line_terminator}})'
       captures:
         1: keyword.control.import.pattern
         2: variable.other.namespace.pattern
@@ -246,7 +247,7 @@ contexts:
           scope: punctuation.section.block.begin.pattern
           set:
             - meta_scope: meta.namespace.pattern meta.block.pattern
-            - match: '^End[ ]Application[ ]Scope\.'
+            - match: '^End[ ]Application[ ]Scope{{line_terminator}}'
               scope: punctuation.section.block.end.pattern
               pop: true
             - include: main
@@ -258,13 +259,13 @@ contexts:
       scope: storage.type.class.pattern
       push:
         - meta_scope: meta.namespace.pattern
-        - match: '\b({{name}})\b(\.)'
+        - match: '\b({{name}})\b({{line_terminator}})'
           captures:
             1: section.block.begin.pattern
             2: punctuation.definition.tag.end.pattern
           set:
             - meta_scope: meta.namespace.pattern meta.block.pattern
-            - match: '^[ ]{2}(End[ ]Application)(\.)'
+            - match: '^[ ]{2}(End[ ]Application)({{line_terminator}})'
               captures:
                 1: storage.type.class.pattern
                 2: punctuation.definition.tag.end.pattern
@@ -273,7 +274,7 @@ contexts:
       pop: true
 
   enum_declaration:
-    - match: '^[ ]{2}(?:(?:(?:(Public)[ ])?))(Enumeration)[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})(\.)'
+    - match: '^[ ]{2}(?:(?:(?:(Public)[ ])?))(Enumeration)[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})({{line_terminator}})'
       captures:
         1: storage.modifier.access.pattern
         2: storage.type.class.pattern
@@ -286,7 +287,7 @@ contexts:
         - match: ''
           set:
             - meta_scope: meta.enum.body.pattern meta.block.pattern
-            - match: '^[ ]{2}(End[ ]Enumeration)(\.)'
+            - match: '^[ ]{2}(End[ ]Enumeration)({{line_terminator}})'
               captures:
                 1: storage.type.class.pattern
                 2: punctuation.definition.tag.end.pattern
@@ -309,7 +310,7 @@ contexts:
     - match: '[ ]'
       push: delegate_name
     - include: type
-    - match: '\.'
+    - match: '{{line_terminator}}'
       scope: punctuation.definition.tag.end.pattern
       push: delegate_params
       pop: true
@@ -323,12 +324,12 @@ contexts:
 
   delegate_params:
     - meta_content_scope: meta.method.parameters.pattern
-    - match: '^[ ]{2}(End Parameters)(\.)' # end of parameters
+    - match: '^[ ]{2}(End Parameters)({{line_terminator}})' # end of parameters
       captures:
         1: storage.type.pattern
         2: meta.delegate.parameters.pattern punctuation.section.parameters.end.pattern
       pop: true
-    - match: '^[ ]{2}(Parameters)(\.)' # some text - means there's another parameter
+    - match: '^[ ]{2}(Parameters)({{line_terminator}})' # some text - means there's another parameter
       captures:
         1: storage.type.pattern
         2: meta.delegate.parameters.pattern
@@ -346,12 +347,12 @@ contexts:
     - match: '[ ]Default[ ]' # default parameter value follows
       scope: storage.type.pattern
       push: line_of_code_in
-    - match: '\.' #end of parameter
+    - match: '{{line_terminator}}' #end of parameter
       scope: punctuation.definition.tag.end.pattern
       pop: true
 
   class_declaration:
-    - match: '^[ ]{2}(?:\b(Public)[ ]\b)?\b({{reserved_objects}}|{{named_type}})[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})\b(\.)'
+    - match: '^[ ]{2}(?:\b(Public)[ ]\b)?\b({{reserved_objects}}|{{named_type}})[ ]({{name}})[ ](In[ ]Domain)[ ]({{name}})\b({{line_terminator}})'
       captures:
         1: storage.modifier.access.pattern
         2: storage.type.class.pattern
@@ -363,7 +364,7 @@ contexts:
       pop: true
 
   class_body:
-    - match: '^[ ]{2}(Body)(\.)'
+    - match: '^[ ]{2}(Body)({{line_terminator}})'
       captures:
         1: constant.other.pattern
         2: punctuation.section.block.begin.pattern
@@ -373,7 +374,7 @@ contexts:
         - include: property_signature
         - include: method_signature
         - include: event_signature
-        - match: '^[ ]{2}(End[ ]Body)(\.)'
+        - match: '^[ ]{2}(End[ ]Body)({{line_terminator}})'
           captures: 
             1: storage.type.class.pattern
             2: punctuation.section.block.end.pattern
@@ -408,11 +409,11 @@ contexts:
     - match: '\bDefault\b' # default parameter value follows
       scope: storage.type.pattern
       push: line_of_code_in
-    - match: '\.' #end of parameter
+    - match: '{{line_terminator}}' #end of parameter
       pop: true 
 
   property_signature:
-    - match: '(?=^[ ]{4}(?:Public[ ])?Property[ ]{{name}}[ ]To[ ]{{named_type}}\.)'
+    - match: '(?=^[ ]{4}(?:Public[ ])?Property[ ]{{name}}[ ]To[ ]{{named_type}}{{line_terminator}})'
       push: property_declaration
       pop: true
 
@@ -427,21 +428,21 @@ contexts:
     - match: '\bTo\b'
       scope:  storage.type.pattern
       push: line_of_code_in
-    - match: '\.'
+    - match: '{{line_terminator}}'
       scope: punctuation.definition.tag.begin.pattern
       pop: true 
 
   method_signature:
     - meta_scope: meta.method.pattern
-    - match: '(?=^[ ]{4}(?:Public[ ])?(?:{{reserved_visibility}}[ ])?Method[ ]{{name}}[ ]Returns[ ]{{named_type}}\.)'
+    - match: '(?=^[ ]{4}(?:Public[ ])?(?:{{reserved_visibility}}[ ])?Method[ ]{{name}}[ ]Returns[ ]{{named_type}}{{line_terminator}})'
       push: [method_params, method_declaration]
-    - match: '^[ ]{4}(?:(?:(?:(?:({{reserved_visibility}}))?)[ ](Constructor)(\.)'
+    - match: '^[ ]{4}(?:(?:(?:(?:({{reserved_visibility}}))?)[ ](Constructor)({{line_terminator}})'
       captures:
         1: storage.modifier.pattern
         2: entity.name.function.constructor.cs
         3: meta.method.parameters.cs punctuation.section.parameters.begin.cs
       push: [constructor_params]
-    - match: '^[ ]{4}(End[ ]Method)(\.)'
+    - match: '^[ ]{4}(End[ ]Method)({{line_terminator}})'
       captures:
         1: constant.other.pattern
         2: punctuation.section.parameters.end.cs
@@ -462,7 +463,7 @@ contexts:
       scope:  storage.type.pattern
     - match: '\b{{named_type}}\b'
       scope: variable.other.namespace.pattern
-    - match: '\.'
+    - match: '{{line_terminator}}'
       scope: punctuation.definition.tag.begin.pattern
       push:
       - meta_content_scope: meta.method.parameters.pattern
@@ -478,14 +479,14 @@ contexts:
     - include: parameters_list
 
   parameters_list:
-    - match: '^[ ]{4}(Parameters)\.' # some text - means there's another parameter
+    - match: '^[ ]{4}(Parameters){{line_terminator}}' # some text - means there's another parameter
       captures:
         1: storage.type.pattern
         2: meta.method.parameters.pattern
       push:
         - meta: meta.method.constructor.pattern
         - include: method_param      
-    - match: '^[ ]{4}(End Parameters)(\.)' # end of parameters
+    - match: '^[ ]{4}(End Parameters)({{line_terminator}})' # end of parameters
       captures:
         1: storage.type.pattern
         2: meta.method.parameters.pattern punctuation.section.parameters.end.pattern
@@ -504,19 +505,19 @@ contexts:
     - match: '[ ]Default[ ]' # default parameter value follows
       scope: storage.type.pattern
       push: line_of_code_in
-    - match: '\.' #end of parameter
+    - match: '{{line_terminator}}' #end of parameter
       pop: true
 
   method_body:
     - meta_scope: meta.method.body.pattern
-    - match: '(?:^[ ]{6}(Method[ ]Body)(\.))'
+    - match: '(?:^[ ]{6}(Method[ ]Body)({{line_terminator}}))'
       captures:
         1: constant.other.pattern
         2: punctuation.definition.tag.begin.pattern
       scope: storage.type.function.pattern
       set:
         - meta_scope: meta.method.body.pattern meta.block.pattern
-        - match: '^[ ]{6}(End[ ]Method)(\.)' # End tag for methods
+        - match: '^[ ]{6}(End[ ]Method)({{line_terminator}})' # End tag for methods
           captures:
             1: constant.other.pattern
             2: punctuation.definition.tag.begin.pattern
@@ -529,53 +530,53 @@ contexts:
 
   line_of_code:
     # Language Keywords
-    - match: '\b(If)[ ]' # Start Conditional
+    - match: '^[ ]{6}[ ]*\b(If)[ ]' # Start Conditional
       captures:
         1: keyword.control.condition.if.pattern
       set: [end_if, else_block, if_block, if_condition]
-    - match: '\b(Choice)[ ]' # Choice Conditional
+    - match: '^[ ]{6}[ ]*\b(Choice)[ ]' # Choice Conditional
       captures:
         1: keyword.control.flow.switch.pattern
       set: [switch_block, if_condition]
-    - match: '\b(Compare)[ ]'
+    - match: '^[ ]{6}[ ]*\b(Compare)[ ]'
       captures:
         1: keyword.control.flow.switch.pattern
       set: [compare_block, line_of_code, compare_to, line_of_code, compare_with, line_of_code, compare_condition]
-    - match: '\b(For)[ ]'
+    - match: '^[ ]{6}[ ]*\b(For)[ ]'
       captures:
         1: keyword.control.loop.for.pattern
       set: [for_block, for_variable, for_to, for_variable, for_from, for_variable]
-    - match: '\b(Each)[ ]'
+    - match: '^[ ]{6}[ ]*\b(Each)[ ]'
       captures:
         1: keyword.control.loop.foreach.pattern
       set: [each_block, line_of_code, each_in, each_variable]
-    - match: '\b(Error Scope)\b'
+    - match: '^[ ]{6}[ ]*\b(Error Scope)\b'
       captures:
         1: keyword.control.trycatch.try.pattern
       set: [finally_block, catch_expr, try_block]
-    - match: '\b(Dispose[ ]After)([ ])'
+    - match: '^[ ]{6}[ ]*\b(Dispose[ ]After)([ ])'
       captures:
         1: keyword.control.using.pattern
         2: meta.group.pattern
       set: [using_block, line_of_code]
-    - match: '\bLoop[ ]\\b'
+    - match: '^[ ]{6}[ ]*\bLoop[ ]Until\b'
       scope: keyword.control.loop.do.pattern
       set: [while_block, while_condition]
-    - while: '\bLoop While\b'
+    - while: '^[ ]{6}[ ]*\bLoop While\b'
       scope: keyword.control.loop.while.pattern
       set: [while_block, while_condition]
-    - match: '\b(Else|When|Otherwise|Handle|Afterwards)\b'
+    - match: '^[ ]{6}[ ]*\b(Else|When|Otherwise|Handle|Afterwards)\b'
       scope: keyword.control.pattern invalid.illegal.unexpected.keyword.pattern
-    - match: '\b(Return)\b'
+    - match: '^[ ]{6}[ ]*\b(Return)\b'
       scope: keyword.control.flow.return.pattern
-    - match: '\b(Go Next|Exit)\b'
+    - match: '^[ ]{6}[ ]*\b(Go Next|Exit)\b'
       captures: 
         1: keyword.control.flow.break.pattern
       pop: true
-    - match: '\b(Throw|Rethrow)\b'
+    - match: '^[ ]{6}[ ]*\b(Throw|Rethrow)\b'
       scope: keyword.control.trycatch.throw.pattern
       set: line_of_code_in
-    - match: '(Constant|Mutable)[ ]({{name}})[ ](Of)[ ]({{named_type}})[ ](=)[ ]'
+    - match: '^[ ]{6}[ ]*(Constant|Mutable)[ ]({{name}})[ ](Of)[ ]({{named_type}})[ ](=)[ ]'
       captures:
         1: storage.type.variable.pattern
         2: variable.other.member.pattern
@@ -584,8 +585,6 @@ contexts:
         5: keyword.operator.assignment.variable.pattern
       set: line_of_code_in
     - include: app_scope_alias
-    - match: '{{\.}}'
-      scope: punctuation.accessor.dot.pattern
     - match: '^[ ]{6}[ ]*(?=\S)'
       set: line_of_code_in
 
@@ -605,11 +604,10 @@ contexts:
         - match: '(?={{name}})'
           scope: variable.other.pattern
         - include: line_of_code_in
-        # Lots more to do here
-
+        
   line_of_code_in:
     - include: line_of_code_in_no_period
-    - match: '\.'
+    - match: '{{line_terminator}}'
       scope: punctuation.terminator.statement.cs
       pop: true
 
@@ -617,9 +615,7 @@ contexts:
     - match: '\b(Value)\b'
       scope: variable.language.pattern
     - include: keywords
-    - match: '\.'
-      scope: punctuation.accessor.dot.pattern
-    - match: '{{operations}}='
+    - match: '{{operations}}'
       scope: keyword.operator.pattern
     - match: '='
       scope: keyword.operator.assignment.pattern
@@ -629,6 +625,11 @@ contexts:
       captures:
         1: variable.function.pattern
       push: [function_call_arguments, accessor_arguments]
+    - match: '({{named_type}})[ ](/()'
+      captures:
+        1: variable.function.pattern
+        2: meta.brackets.pattern punctuation.section.brackets.begin.pattern
+      push: accessor_arguments
     - match: '({{name}})(\??\()' # Possibly conditional Array
       captures:
         1: variable.other.pattern
@@ -647,20 +648,17 @@ contexts:
         - match: '\)'
           scope: punctuation.section.group.end.pattern
           pop: true
-        - include: lambdas
-        - include: line_of_code_in_no_semicolon
-    - match: '(?:\)|,|{{operations}})'
+        - include: line_of_code_in_no_period
+    - match: '(?:\)|,|{{operations}})'    
       pop: true
 
   accessor_arguments:
     - meta_content_scope: meta.brackets.pattern
-    - match: '({{name}})(:)'
-      captures:
-        1: variable.other.parameter.pattern
-        2: punctuation.separator.accessor.pattern
+    - match: '{{name}}'
+      scope: variable.other.parameter.pattern
     - match: ','
       scope: punctuation.separator.accessor.pattern
-    - match: '\.'
+    - match: '{{line_terminator}}'
       scope: meta.brackets.pattern punctuation.section.brackets.end.pattern
       pop: true
     - include: line_of_code_in
@@ -679,7 +677,7 @@ contexts:
     - match: '{{number_hex}}'
       scope: constant.numeric.integer.hexadecimal.pattern
     - match: '{{number_number}}'
-      scope: constant.numeric.integer.hexadecimal.pattern
+      scope: constant.numeric.pattern
     - match: '"'
       scope: punctuation.definition.string.begin.pattern
       push: string
@@ -737,7 +735,7 @@ contexts:
       scope: constant.other.placeholder.pattern
       captures:
         1: punctuation.definition.placeholder.begin.pattern
-        2: constants.numeric.pattern invalid.illegal.unclosed-string-placeholder.pattern
+        2: constant.numeric.pattern invalid.illegal.unclosed-string-placeholder.pattern
     - match: '(\{)(\d+)'
       captures:
         1: punctuation.definition.placeholder.begin.pattern
@@ -809,53 +807,52 @@ contexts:
         2: meta.group.pattern punctuation.section.group.begin.pattern
         3: variable.other.namespace.pattern
       push: catch_block
+    - include: catch_when
     - match: '(?=\S)'
       pop: true
 
   try_block:
     - meta_content_scope: meta.group.pattern
-    - match
+    - push: catch_expr
+    - push: always_expr
+    - match: '^[ ]{6}[ ]*(End[ ]Error[ ]Scope)(\.)'
+      captures:
+        1: keyword.control.trycatch.catch.pattern
+        2: meta.group.pattern punctuation.section.group.begin.pattern
+      pop: true
+    - include: code_block_in
+    - match: (?=\S)
+      pop: true
 
-  catch_block:
+  always_expr:
     - meta_content_scope: meta.group.pattern
-    - match: '^[ ]{6}[ ]*(End[ ]Handle)(\.)'
+    - match: '^[ ]{6}[ ]*Always'
+      scope: keyword.control.trycatch.finally.pattern
+    - include: finally_block
+
+  trycatch_block:
+    - meta_content_scope: meta.group.pattern
+    - match: '^[ ]{6}[ ]*(?=(Handle|Always))'
       captures: 
         1: storage.type.pattern
         2: meta.group.pattern punctuation.section.group.end.pattern
-      set: catch_when
+      pop: true
+    - include: code_block_in
+    - match: (?=\S)
+      pop: true
 
-  catch_when:
-    - match: '\bHandle When\b'
+  catch_block:
+    - match: '\bWhen\b'
       scope: keyword.control.trycatch.when.pattern
-      set:
-        - match: '.'
-          scope: punctuation.section.group.begin.pattern
-          set:
-            - meta_scope: meta.group.pattern
-            - include: line_of_code_in
-        - match: '(?=\S)'
-          set: trycatch_block
-    - match: '(?=\S)'
-      set: trycatch_block 
+      push: if_condition
+      set: trycatch_block  
 
   finally_block:
     - meta_scope: meta.block.trycatch.pattern
-    - match: '(Always)\b'
+    - match: 'Always\b'
       scope: keyword.control.trycatch.finally.pattern
       set: trycatch_block
     - match: '(?=\S)'
-      pop: true
-
-  trycatch_block:
-    - match: '^'
-      scope: punctuation.section.block.begin.pattern
-      set:
-        - meta_scope: meta.block.pattern
-        - match: \'^$'
-          scope: punctuation.section.block.end.pattern
-          pop: true
-        - include: code_block_in
-    - match: (?=\S)
       pop: true
 
   using_block:
