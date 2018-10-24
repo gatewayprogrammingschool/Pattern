@@ -4,7 +4,7 @@
 
 Almost all programs are written to solve some problem that can be expressed as one or more choices that the program must make a decision about.  Decisions are deconstructed in to one or more expressions that ultimately result in a boolean value.  Always forcing the developer to reduce a value all the way down to a single boolean value introduces a lot o complexity and redundancy.  Pattern's expressiveness aims to simplify decision and make the code more readable.
 
-In addtion to the traditional `If`-`Else` statements, Pattern introduces the `Compare`-`With`-`When` statement that allows for direct testing of a pair of like-typed values which provides a grouping of possible actions to be taken based on the logical disposition of the values.
+In addition to the traditional `If`-`Else` statements, Pattern introduces the `Compare`-`With`-`When` statement that allows for direct testing of a pair of like-typed values which provides a grouping of possible actions to be taken based on the logical disposition of the values.
 
 Finally, Pattern provides `Choice`-`When` statement which works by testing a value against a possible set of values and allowing a specific action to be taken if the condition is met.
 
