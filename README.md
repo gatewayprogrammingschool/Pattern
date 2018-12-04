@@ -1,2 +1,3 @@
 # Pattern
-Pattern is LLVM based language to build sys based on standard design patterns.
+Pattern is Dotnet Core based language to build sys based on standard design patterns.
+
