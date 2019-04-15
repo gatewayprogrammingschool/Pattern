@@ -9,67 +9,63 @@
    - Model
  */
 
+// Application Scope is the equivalent of a Namespace
+// Each Pattern source file must have an Application Scope declaration.
+Application Scope Ninja::TheSharp
+
 // Namespace of outside library.  Namespaces use :: before Each
 // identifying segment.  A fully qualified type is a Namespace
 // pointing to a type --   ::System->Console
 // In this way, naming collisions between namespaces and types
 // are always avoided.
-Needs ::System
-
-// Application Scope is the equivalent of a Namespace
-// Each Pattern source file must have an Application Scope declaration.
-Application Scope ::Ninja::TheSharp
+Needs System
 
 // Application is the root instance of the application. It's constructor
 // Is the entry point to our program.  It does not have parameters defined
-// As they are fixed to the objigatory Array of Strings.
+// As they are fixed to the obligatory Array of Strings.
 Application MyRealApp
-  Constructor
+  Start
     // Local variables can be either Constant or Mutable
     // Here we declare and instantiate instances of MyModel, MyView and MyController
-    Constant model Of Type MyModel In Domain "Test App"
+    Constant model Of MyModel In Domain "Test App"
 
     // Here we declare our View and pass it the instance of MyModel
-    Constant view Of Type MyView(MyModel) In Domain "Test App"
+    Constant view Of MyView(MyModel) In Domain "Test App"
 
     // Same for the Controller
-    Constant controller Of Type MyController(view) In Domain "Test App"
-    
+    Constant controller Of MyController(view) In Domain "Test App"
+
     // Now we make the view do something
     // When we don't need to pass parameters, parenthesis are optional.
     view.ReadData
 
     // We're done, wait for a keypress
     Console.ReadKey
-  End Constructor
+  End Start
 End Application
 
 // Here we define a new Controller.  Controllers can receive View instances
 // during construction, or View instances can be subscribed to later.
 Controller MyController
   Constructor
-    Parameters
-      Parameter myView Of Type MyView
-    End Parameters
-    
+    Parameter myView Of MyView
+
     // Our controller subscribes to the MyView's ModelUpdated Trigger
-    Subscribe MyView.ModelUpdated With MyView
+    Subscribe MyView.ModelUpdated With MyView_MyNumber
   End Constructor
 
   // This is our Trigger handler
   // By Default, Triggers on Views send the View's instance and the Models associated
   // with the Trigger.
   Method MyView_MyNumber Returns MyView
-    Parameters
-      Parameter view Of Type MyView
-      Parameter models Of Type Array(MyModel)
-    End Parameters
+    Parameter view Of MyView
+    Parameter models Of Array(MyModel)
 
     Console.WriteLine($"MyNumber changed to {models(0).MyNumber}.")
 
     // References to objects are almost alway immutable, thus the Constant declaration.
-    Constant model Of Type MyModel = models(0)
-    
+    Constant model Of MyModel = models(0)
+
     // Loop Once Until always goes through at least one iteration of the loop
     Loop Once Until model.MyNumber >= 100
       model.MyNumber = model.MyNumber * 2 + model.MyNumber % 5
@@ -78,26 +74,24 @@ Controller MyController
     // Here the Controller tells the View to display results to the Actor.
     view.WriteData
   End Method
-End Controller
+End MyController
 
 // Here this View is a stub class.  In a real application, View
 // would be attached to a real I/O mechanism such as web page
 // or form.
 View MyView
   Constructor
-    Parameters
-      Parameter model Of Type MyModel
-    End Parameters
+    Parameter model Of MyModel
 
     // Initialize the Model of the View
     _model = model
     _model.MyNumber = 40      // This is Mutable and is changeable anytime.
     _model.MyDate = Date.Now  // This is Constant and can on have it's value set once.
-  End Constructor  
-  
+  End Constructor
+
   // Our private instance variable for MyModel
-  Private Constant _model Of Type MyModel
- 
+  Private Constant _model Of MyModel
+
   // A Visible property named "Model" exposing _model.
   // Visible properties are only available to sub-types
   // of the declaring type.
@@ -110,10 +104,9 @@ View MyView
   // An method that allows an actor to initiate
   // an action within MyView
   Public Method ReadData
-
     // Our local variables are Mutable
-    Mutable temp Of Type Number
-    Mutable input Of Type String
+    Mutable temp Of Number
+    Mutable input Of String
 
     input = Console.ReadLine()
 
@@ -129,7 +122,7 @@ View MyView
     _model.MyNumber = model.MyNumber + temp
 
     // MyModel has changed, notify the Controller.
-    ModelUpdated
+    ModelUpdated(Me, Array(_model))
   End Method
 
   // Callback method for the Controller to initiate a response
@@ -137,16 +130,16 @@ View MyView
   Public Method WriteData
     Console.WriteLine($"{_model.MyNumber} at {_model.MyDate}.")
   End Method
-End View
+End MyView
 
 // All data that an Actor can interact with must be in a Model
 Model MyModel
   // Models may only have fields and properties.
-  // All manipulation of a Model is to be performed 
+  // All manipulation of a Model is to be performed
   // In Facades, Controllers, and Bridges.
-  Private Mutable _myNumber Of Type Number = 40
-  Private Constant _myDate of Type Date
+  Private Mutable _myNumber Of Number = 40
+  Private Constant _myDate Of Date
 
   Public MyNumber To _myNumber
   Public MyDate To _myDate
-End Model
+End MyModel
